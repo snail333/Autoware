@@ -187,6 +187,8 @@ if (CUDA_FOUND)
         set(CUDA_NPPI_LIBS ${CUDA_nppi_LIBRARY})
     endif ()
 
+    add_definitions(-DCUDA_FOUND)
+
     cuda_add_executable(depth_completer
             nodes/depth_completer/depth_completer_core_gpu.cu
             nodes/depth_completer/depth_completer.cpp

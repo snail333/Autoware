@@ -10,8 +10,9 @@
 #include <cv_bridge/cv_bridge.h>
 
 #include "depth_completer_core.hpp"
+#ifdef CUDA_FOUND
 #include "depth_completer_core_gpu.hpp"
-
+#endif
 //#include <chrono>
 
 namespace {
@@ -33,13 +34,19 @@ namespace {
       fill_type_("multiscale"),
       extrapolate_(false),
       blur_type_("bilateral"),
-      use_gpu_(true) {
+      use_gpu_(false) {
       // Get execution parameters
       GetExecutionParams();
 
       // Construct core class
       if (use_gpu_) {
+#ifdef CUDA_FOUND
         depth_completer_gpu_.reset(new DepthCompleterGPU());
+#else
+        use_gpu_= false;
+        depth_completer_.reset(new DepthCompleter());
+        ROS_INFO_STREAM("[" << kAppName << "] use_gpu is set but no CUDA was found. Running on CPU.";
+#endif
       } else {
         depth_completer_.reset(new DepthCompleter());
       }
@@ -78,8 +85,9 @@ namespace {
 
     // The core class instance of Depth completion
     std::unique_ptr<DepthCompleter> depth_completer_;
+#ifdef CUDA_FOUND
     std::unique_ptr<DepthCompleterGPU> depth_completer_gpu_;
-
+#endif
     //
     // Function to get execution paramters
     //
@@ -126,9 +134,11 @@ namespace {
       cv::Mat final_depths;
       if (fill_type_ == "fast") {
         if (use_gpu_) {
+#ifdef CUDA_FOUND
           final_depths = depth_completer_gpu_->FillInFast(projected_depths,
                                                           extrapolate_,
                                                           blur_type_);
+#endif
         } else {
         final_depths = depth_completer_->FillInFast(projected_depths,
                                                     extrapolate_,
@@ -136,9 +146,11 @@ namespace {
         }
       } else if (fill_type_ == "multiscale") {
         if (use_gpu_) {
+#ifdef CUDA_FOUND
           final_depths = depth_completer_gpu_->FillInMultiScale(projected_depths,
                                                                 extrapolate_,
                                                                 blur_type_);
+#endif
         } else {
         final_depths = depth_completer_->FillInMultiScale(projected_depths,
                                                           extrapolate_,
