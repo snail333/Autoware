@@ -45,7 +45,7 @@ namespace {
 #else
         use_gpu_= false;
         depth_completer_.reset(new DepthCompleter());
-        ROS_INFO_STREAM("[" << kAppName << "] use_gpu is set but no CUDA was found. Running on CPU.";
+        ROS_INFO_STREAM("[" << kAppName << "] use_gpu is set but no CUDA was found. Running on CPU.");
 #endif
       } else {
         depth_completer_.reset(new DepthCompleter());
