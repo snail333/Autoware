@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(ndt_gpu)
 
-find_package(catkin REQUIRED)
-find_package(PCL REQUIRED)
+find_package(catkin REQUIRED COMPONENTS pcl_ros pcl_conversions )
+#find_package(PCL REQUIRED)
 find_package(CUDA)
 
 find_package(Eigen3 QUIET)
@@ -47,7 +47,7 @@ if (CUDA_FOUND)
     set(SUBSYS_DESC "Point cloud ndt gpu library")
 
     catkin_package(
-            DEPENDS PCL                                #Non-catkin CMake projects
+            DEPENDS pcl_ros pcl_conversions             #Non-catkin CMake projects
             INCLUDE_DIRS include                        #The exported include paths
             LIBRARIES ndt_gpu                           #The exported libraries from the project
     )
@@ -87,7 +87,7 @@ if (CUDA_FOUND)
             ${CUDA_LIBRARIES}
             ${CUDA_CUBLAS_LIBRARIES}
             ${CUDA_curand_LIBRARY}
-            ${PCL_LIBRARIES}
+#            ${PCL_LIBRARIES}
             )
 
     install(DIRECTORY include/${PROJECT_NAME}/
