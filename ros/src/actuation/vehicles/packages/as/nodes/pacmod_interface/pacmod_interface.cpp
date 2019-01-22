@@ -118,7 +118,7 @@ void PacmodInterface::publishPacmodSteer(const autoware_msgs::VehicleCmd& msg)
   steer.clear_override = clear_override_;
   steer.clear_faults = clear_faults_;
 
-  steer.command = msg.ctrl_cmd.steering_angle * 10.0;
+  steer.command = msg.ctrl_cmd.steering_angle * STEERING_GEAR_RATIO;
   // TODO, default max = 3.3, 4.71239 is fast but jerky
   steer.rotation_rate = rotation_rate_;
 
@@ -151,7 +151,8 @@ void PacmodInterface::publishPacmodAccel(const autoware_msgs::VehicleCmd& msg)
 
   pacmod_accel_pub_.publish(accel);
 
-  ROS_INFO("ACCEL: target = %f, actual = %f, error = %f, command = %f", msg.ctrl_cmd.linear_velocity, current_speed_, error, accel.command);
+  ROS_INFO("ACCEL: target = %f, actual = %f, error = %f, command = %f", msg.ctrl_cmd.linear_velocity, current_speed_,
+           error, accel.command);
 }
 
 void PacmodInterface::publishPacmodBrake(const autoware_msgs::VehicleCmd& msg)
@@ -178,7 +179,8 @@ void PacmodInterface::publishPacmodBrake(const autoware_msgs::VehicleCmd& msg)
 
   pacmod_brake_pub_.publish(brake);
 
-  ROS_INFO("BRAKE: target = %f, actual = %f, error = %f, command = %f", msg.ctrl_cmd.linear_velocity, current_speed_, error, brake.command);
+  ROS_INFO("BRAKE: target = %f, actual = %f, error = %f, command = %f", msg.ctrl_cmd.linear_velocity, current_speed_,
+           error, brake.command);
 }
 
 void PacmodInterface::publishPacmodShift(const autoware_msgs::VehicleCmd& msg)

@@ -38,7 +38,11 @@
 
 #include "pid_controller.h"
 
-const static double WHEEL_BASE = 2.79;
+const static double WHEEL_BASE = 2.79;               // [m]
+const static double MINIMUM_TURNING_RADIUS = 5.9;    // [m]
+const static double MAX_STEERING_WHEEL_ANGLE = 8.6;  // [rad]
+const static double STEERING_GEAR_RATIO
+  = MAX_STEERING_WHEEL_ANGLE / std::asin(WHEEL_BASE / MINIMUM_TURNING_RADIUS);
 
 class PacmodInterface
 {
