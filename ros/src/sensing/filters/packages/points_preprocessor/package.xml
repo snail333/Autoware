@@ -1,17 +1,17 @@
 <?xml version="1.0"?>
 <package>
-  <name>points_preprocessor</name>
-  <version>1.9.1</version>
-  <description>The points_preprocessor package</description>
+    <name>points_preprocessor</name>
+    <version>1.10.0</version>
+    <description>The points_preprocessor package</description>
 
-  <maintainer email="abrahammonrroy@yahoo.com">amc-nu</maintainer>
-  <author email="n.patiphon@gmail.com">n-patiphon</author>
-  <author email="akihito.ohsato@tier4.jp">aohsato</author>
+    <maintainer email="abrahammonrroy@yahoo.com">amc-nu</maintainer>
+    <author email="n.patiphon@gmail.com">n-patiphon</author>
+    <author email="akihito.ohsato@tier4.jp">aohsato</author>
 
-  <license>BSD</license>
+    <license>Apache 2</license>
 
-  <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>autoware_build_flags</buildtool_depend>
+    <buildtool_depend>catkin</buildtool_depend>
+    <buildtool_depend>autoware_build_flags</buildtool_depend>
 
   <build_depend>autoware_config_msgs</build_depend>
   <build_depend>cv_bridge</build_depend>
