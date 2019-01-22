@@ -23,7 +23,7 @@
 #include <message_filters/synchronizer.h>
 
 #include <std_msgs/Bool.h>
-#include <std_msgs/Float64.h>
+#include <std_msgs/Float32MultiArray.h>
 
 #include <autoware_msgs/VehicleCmd.h>
 #include <autoware_msgs/VehicleStatus.h>
@@ -34,7 +34,7 @@
 #include <pacmod_msgs/SteerSystemCmd.h>
 #include <pacmod_msgs/SystemRptInt.h>
 #include <pacmod_msgs/SystemRptFloat.h>
-#include <pacmod_msgs/VehicleSpeedRpt.h>
+#include <pacmod_msgs/WheelSpeedRpt.h>
 
 #include "pid_controller.h"
 
@@ -42,8 +42,9 @@
 const static double WHEEL_BASE = 2.79;               // [m]
 const static double MINIMUM_TURNING_RADIUS = 5.9;    // [m]
 const static double MAX_STEERING_WHEEL_ANGLE = 8.6;  // [rad]
-const static double STEERING_GEAR_RATIO
+const static double STEERING_GEAR_RATIO              // [-]
   = MAX_STEERING_WHEEL_ANGLE / std::asin(WHEEL_BASE / MINIMUM_TURNING_RADIUS);
+const static double TIRE_RADIUS = 0.77 / 2.0;        // [m]
 
 class PacmodInterface
 {
@@ -55,7 +56,7 @@ public:
 
 private:
   // typedefs
-  typedef message_filters::sync_policies::ApproximateTime<pacmod_msgs::VehicleSpeedRpt, pacmod_msgs::SystemRptFloat>
+  typedef message_filters::sync_policies::ApproximateTime<pacmod_msgs::WheelSpeedRpt, pacmod_msgs::SystemRptFloat>
       PacmodTwistSyncPolicy;
 
   // node handles
@@ -68,7 +69,7 @@ private:
 
   // subscribers from pacmod
   ros::Subscriber pacmod_enabled_sub_;
-  message_filters::Subscriber<pacmod_msgs::VehicleSpeedRpt>* pacmod_speed_sub_;
+  message_filters::Subscriber<pacmod_msgs::WheelSpeedRpt>* pacmod_wheel_sub_;
   message_filters::Subscriber<pacmod_msgs::SystemRptFloat>* pacmod_steer_sub_;
   message_filters::Synchronizer<PacmodTwistSyncPolicy>* pacmod_twist_sync_;
 
@@ -86,7 +87,12 @@ private:
   // ros::Publisher pacmod_horn_pub_;
   // ros::Publisher pacmod_wiper_pub_;
 
+  // publishers for debug
+  ros::Publisher debug_accel_pub_;
+  ros::Publisher debug_brake_pub_;
+
   // rosparams
+  bool debug_;
   double loop_rate_;
   double accel_kp_, accel_ki_, accel_kd_;
   double brake_kp_, brake_ki_, brake_kd_;
@@ -125,7 +131,7 @@ private:
 
   // callbacks from pacmod
   void callbackPacmodEnabled(const std_msgs::Bool::ConstPtr& msg);
-  void callbackPacmodTwist(const pacmod_msgs::VehicleSpeedRpt::ConstPtr& speed,
+  void callbackPacmodTwist(const pacmod_msgs::WheelSpeedRpt::ConstPtr& wheel,
                            const pacmod_msgs::SystemRptFloat::ConstPtr& steer);
 
   // functions

@@ -28,6 +28,7 @@ PacmodInterface::PacmodInterface()
   , clear_faults_(false)
   , init_vehicle_cmd_(false)
 {
+  private_nh_.param<bool>("debug", debug_, false);
   private_nh_.param<double>("loop_rate", loop_rate_, 100.0);
   private_nh_.param<double>("accel_kp", accel_kp_, 0.2);
   private_nh_.param<double>("accel_ki", accel_ki_, 0.1);
@@ -53,13 +54,13 @@ PacmodInterface::PacmodInterface()
 
   // from pacmod
   pacmod_enabled_sub_ = nh_.subscribe("pacmod/as_tx/enabled", 1, &PacmodInterface::callbackPacmodEnabled, this);
-  pacmod_speed_sub_ =
-      new message_filters::Subscriber<pacmod_msgs::VehicleSpeedRpt>(nh_, "pacmod/parsed_tx/vehicle_speed_rpt", 1);
+  pacmod_wheel_sub_ =
+      new message_filters::Subscriber<pacmod_msgs::WheelSpeedRpt>(nh_, "pacmod/parsed_tx/wheel_speed_rpt", 1);
   pacmod_steer_sub_ =
       new message_filters::Subscriber<pacmod_msgs::SystemRptFloat>(nh_, "pacmod/parsed_tx/steer_rpt", 1);
 
   pacmod_twist_sync_ = new message_filters::Synchronizer<PacmodTwistSyncPolicy>(PacmodTwistSyncPolicy(10),
-                                                                                *pacmod_speed_sub_, *pacmod_steer_sub_);
+                                                                                *pacmod_wheel_sub_, *pacmod_steer_sub_);
   pacmod_twist_sync_->registerCallback(boost::bind(&PacmodInterface::callbackPacmodTwist, this, _1, _2));
 
   // to autoware
@@ -75,6 +76,13 @@ PacmodInterface::PacmodInterface()
   // pacmod_headlight_pub_ = nh_.advertise<pacmod_msgs::SystemCmdInt>("pacmod/as_rx/headlight_cmd", 10);
   // pacmod_horn_pub_ = nh_.advertise<pacmod_msgs::SystemCmdBool>("pacmod/as_rx/horn_cmd", 10);
   // pacmod_wiper_pub_ = nh_.advertise<pacmod_msgs::SystemCmdInt>("pacmod/as_rx/wiper_cmd", 10);
+
+  if (debug_)
+  {
+    debug_accel_pub_ = private_nh_.advertise<std_msgs::Float32MultiArray>("debug/accel", 10);
+    debug_brake_pub_ = private_nh_.advertise<std_msgs::Float32MultiArray>("debug/brake", 10);
+  }
+
 }
 
 PacmodInterface::~PacmodInterface()
@@ -173,6 +181,16 @@ void PacmodInterface::publishPacmodAccel(const autoware_msgs::VehicleCmd& msg)
 
   ROS_INFO("ACCEL: target = %f, actual = %f, error = %f, command = %f", msg.ctrl_cmd.linear_velocity, current_speed_,
            error, accel.command);
+
+  if (debug_)
+  {
+    std_msgs::Float32MultiArray debug;
+    debug.data.push_back(msg.ctrl_cmd.linear_velocity); // target [m/s]
+    debug.data.push_back(current_speed_);               // actual [m/s]
+    debug.data.push_back(error);                        // error [m/s]
+    debug.data.push_back(accel.command);                // command [-]
+    debug_accel_pub_.publish(debug);
+  }
 }
 
 void PacmodInterface::publishPacmodBrake(const autoware_msgs::VehicleCmd& msg)
@@ -201,6 +219,16 @@ void PacmodInterface::publishPacmodBrake(const autoware_msgs::VehicleCmd& msg)
 
   ROS_INFO("BRAKE: target = %f, actual = %f, error = %f, command = %f", msg.ctrl_cmd.linear_velocity, current_speed_,
            error, brake.command);
+
+  if (debug_)
+  {
+    std_msgs::Float32MultiArray debug;
+    debug.data.push_back(msg.ctrl_cmd.linear_velocity); // target [m/s]
+    debug.data.push_back(current_speed_);               // actual [m/s]
+    debug.data.push_back(error);                        // error [m/s]
+    debug.data.push_back(brake.command);                // command [-]
+    debug_brake_pub_.publish(debug);
+  }
 }
 
 void PacmodInterface::publishPacmodShift(const autoware_msgs::VehicleCmd& msg)
@@ -290,13 +318,14 @@ void PacmodInterface::callbackPacmodEnabled(const std_msgs::Bool::ConstPtr& msg)
   prev_engage_state_ = engage_state_;
 }
 
-void PacmodInterface::callbackPacmodTwist(const pacmod_msgs::VehicleSpeedRpt::ConstPtr& speed,
+void PacmodInterface::callbackPacmodTwist(const pacmod_msgs::WheelSpeedRpt::ConstPtr& wheel,
                                           const pacmod_msgs::SystemRptFloat::ConstPtr& steer)
 {
   static double lv, az;
 
-  current_speed_ = speed->vehicle_speed;
-  current_steer_ = steer->output;
+  current_speed_ = TIRE_RADIUS * (wheel->rear_left_wheel_speed + wheel->rear_right_wheel_speed) / 2.0;
+  current_steer_ = steer->output / STEERING_GEAR_RATIO;
+
   lv = current_speed_;
   az = std::tan(current_steer_) * current_speed_ / WHEEL_BASE;
 
