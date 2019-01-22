@@ -38,6 +38,7 @@
 
 #include "pid_controller.h"
 
+// Lexus 450hL parameters
 const static double WHEEL_BASE = 2.79;               // [m]
 const static double MINIMUM_TURNING_RADIUS = 5.9;    // [m]
 const static double MAX_STEERING_WHEEL_ANGLE = 8.6;  // [rad]
@@ -129,7 +130,7 @@ private:
 
   // functions
   bool checkInitialized();
-  void updateOverride();
+  void updateEngage();
   void publishPacmodSteer(const autoware_msgs::VehicleCmd& msg);
   void publishPacmodAccel(const autoware_msgs::VehicleCmd& msg);
   void publishPacmodBrake(const autoware_msgs::VehicleCmd& msg);

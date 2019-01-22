@@ -93,6 +93,7 @@ void PacmodInterface::run()
       ros::Duration(1.0).sleep();
     }
 
+    updateEngage();
     publishPacmodSteer(vehicle_cmd_);
     publishPacmodAccel(vehicle_cmd_);
     publishPacmodBrake(vehicle_cmd_);
@@ -106,6 +107,25 @@ void PacmodInterface::run()
 bool PacmodInterface::checkInitialized()
 {
   return (init_vehicle_cmd_);
+}
+
+void PacmodInterface::updateEngage()
+{
+  enable_ = engage_cmd_;
+  ignore_overrides_ = false;
+
+  if (engage_cmd_ && !prev_engage_cmd_)
+  {
+    clear_override_ = true;
+    clear_faults_ = true;
+  }
+  else
+  {
+    clear_override_ = false;
+    clear_faults_ = false;
+  }
+
+  prev_engage_cmd_ = engage_cmd_;
 }
 
 void PacmodInterface::publishPacmodSteer(const autoware_msgs::VehicleCmd& msg)
@@ -256,22 +276,6 @@ void PacmodInterface::callbackVehicleCmd(const autoware_msgs::VehicleCmd::ConstP
 void PacmodInterface::callbackEngage(const std_msgs::Bool::ConstPtr& msg)
 {
   engage_cmd_ = msg->data;
-
-  enable_ = engage_cmd_;
-  ignore_overrides_ = false;
-
-  if (engage_cmd_ && !prev_engage_cmd_)
-  {
-    clear_override_ = true;
-    clear_faults_ = true;
-  }
-  else
-  {
-    clear_override_ = false;
-    clear_faults_ = false;
-  }
-
-  prev_engage_cmd_ = engage_cmd_;
 }
 
 void PacmodInterface::callbackPacmodEnabled(const std_msgs::Bool::ConstPtr& msg)
