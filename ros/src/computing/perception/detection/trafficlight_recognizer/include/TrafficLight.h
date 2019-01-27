@@ -3,6 +3,7 @@
 
 /* Extra includes */
 #include "autoware_msgs/Signals.h"
+#include "autoware_msgs/TrafficLight.h"
 
 #define MAIN_WINDOW_NAME "Main"
 #define SETTINGS_WINDOW_NAME "Settings"
@@ -10,8 +11,8 @@
 #define TLR_GREEN_SIGNAL_STR "green signal"
 #define TLR_RED_SIGNAL_STR "red signal"
 #define TLR_UNKNOWN_SIGNAL_STR ""
-#define TRAFFIC_LIGHT_RED 0
-#define TRAFFIC_LIGHT_GREEN 1
-#define TRAFFIC_LIGHT_UNKNOWN 2
+constexpr int TRAFFIC_LIGHT_RED = autoware_msgs::TrafficLight::RED;
+constexpr int TRAFFIC_LIGHT_GREEN = autoware_msgs::TrafficLight::GREEN;
+constexpr int TRAFFIC_LIGHT_UNKNOWN = autoware_msgs::TrafficLight::UNKNOWN;
 
 #endif
