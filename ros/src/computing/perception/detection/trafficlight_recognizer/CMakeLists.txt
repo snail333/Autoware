@@ -90,11 +90,24 @@ set(CMAKE_CXX_FLAGS "-O2 -Wall -Wunused-variable ${CMAKE_CXX_FLAGS}")
 ###########
 ## Build ##
 ###########
+
 add_library(libcontext lib/Context.cpp)
 add_dependencies(libcontext
         ${catkin_EXPORTED_TARGETS}
         )
+### detected_traffic_light_projector
+add_executable(detected_traffic_light_projector
+        nodes/detected_traffic_light_projector/detected_traffic_light_projector.cpp
+        nodes/detected_traffic_light_projector/detected_traffic_light_projector_node.cpp
+        )
 
+target_link_libraries(detected_traffic_light_projector
+        ${catkin_LIBRARIES}
+        )
+
+add_dependencies(detected_traffic_light_projector
+        ${catkin_EXPORTED_TARGETS}
+        )
 ### tl_switch ###
 add_executable(tl_switch
         nodes/tl_switch/tl_switch.cpp
@@ -299,7 +312,7 @@ else ()                          # if(EXISTS "${SSD_CAFFE_PATH}")
 endif ()                         # if(EXISTS "${SSD_CAFFE_PATH}")
 
 
-install(TARGETS region_tlr feat_proj tlr_tuner roi_extractor label_maker
+install(TARGETS region_tlr feat_proj tlr_tuner roi_extractor label_maker detected_traffic_light_projector
         ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
