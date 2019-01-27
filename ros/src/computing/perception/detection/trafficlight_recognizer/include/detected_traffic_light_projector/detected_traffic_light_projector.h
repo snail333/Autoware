@@ -3,7 +3,9 @@
 
 //headers in ROS
 #include <ros/ros.h>
+#include <tf/tf.h>
 #include <tf2_ros/transform_listener.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 //heades in Autoware
 #include <libvectormap/vector_map.h>
@@ -29,6 +31,11 @@ private:
     std::vector<geometry_msgs::PoseStamped> getSignalPose();
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener tf_listener_;
+    std::string camera_frame_;
+    std::string map_frame_;
+    geometry_msgs::Point convertPointToGeomPoint(const Point& point);
+    geometry_msgs::Quaternion convertVectorToGeomQuaternion(const Vector& vector);
+    inline double convertDegreeToRadian(double degree);
 };
 
 #endif  //DETECTED_TRAFFIC_LIGHT_PROJECTOR_H_INCLUDED
