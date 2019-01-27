@@ -3,6 +3,7 @@
 
 //headers in ROS
 #include <ros/ros.h>
+#include <tf2_ros/transform_listener.h>
 
 //heades in Autoware
 #include <libvectormap/vector_map.h>
@@ -25,6 +26,9 @@ private:
     ros::Publisher signals_pub_;
     VectorMap vmap;
     std::map<std::string,ros::Subscriber> vector_map_subs_;
+    std::vector<geometry_msgs::PoseStamped> getSignalPose();
+    tf2_ros::Buffer tf_buffer_;
+    tf2_ros::TransformListener tf_listener_;
 };
 
 #endif  //DETECTED_TRAFFIC_LIGHT_PROJECTOR_H_INCLUDED

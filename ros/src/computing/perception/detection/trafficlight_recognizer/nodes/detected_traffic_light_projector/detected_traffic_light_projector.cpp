@@ -1,7 +1,7 @@
 // headers in this package
 #include <detected_traffic_light_projector/detected_traffic_light_projector.h>
 
-DetectedTrafficLightProjector::DetectedTrafficLightProjector(ros::NodeHandle nh,ros::NodeHandle pnh)
+DetectedTrafficLightProjector::DetectedTrafficLightProjector(ros::NodeHandle nh,ros::NodeHandle pnh) : tf_listener_(tf_buffer_)
 {
     nh_ = nh;
     pnh_ = pnh;
@@ -21,6 +21,16 @@ DetectedTrafficLightProjector::~DetectedTrafficLightProjector()
 
 }
 
+std::vector<geometry_msgs::PoseStamped> DetectedTrafficLightProjector::getSignalPose()
+{
+    std::vector<geometry_msgs::PoseStamped> signal_pose;
+    for(auto signal_itr = vmap.signals.begin(); signal_itr != vmap.signals.end(); signal_itr++)
+    {
+        Point p = vmap.points[vmap.vectors[signal_itr->second.vid].pid];
+    }
+    return signal_pose;
+}
+
 void DetectedTrafficLightProjector::detectedObjectsCallback(const autoware_msgs::DetectedObjectArray::ConstPtr msg)
 {
     if (vmap.points.empty() || vmap.lines.empty() || vmap.whitelines.empty() || vmap.lanes.empty() || vmap.dtlanes.empty() || vmap.vectors.empty() || vmap.signals.empty())
@@ -34,6 +44,10 @@ void DetectedTrafficLightProjector::detectedObjectsCallback(const autoware_msgs:
         {
             traffic_light_objects.push_back(*object_itr);
         }
+    }
+    for(auto traffic_light_itr = traffic_light_objects.begin(); traffic_light_itr != traffic_light_objects.end(); traffic_light_itr++)
+    {
+
     }
     return;
 }
