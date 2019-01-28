@@ -14,10 +14,6 @@ This node will project a Pointcloud to the image space as defined in the TF tree
 
 `ROS_NAMESPACE=/camera_ns rosrun cloud_projector cloud_projector`
 
-* From Runtime Manager:
-
-Soon
-
 ### Parameters
 
 Launch file available parameters:
@@ -31,7 +27,8 @@ Launch file available parameters:
 
 ```
 Publications: 
- * /image_cloud [sensor_msgs/Image]
+ * /depth_image [autoware_msgs/DepthImage]
+ * /depth_image_vis [sensor_msgs/Image]
 
 Subscriptions: 
  * /points_raw [sensor_msgs/PointCloud type]
