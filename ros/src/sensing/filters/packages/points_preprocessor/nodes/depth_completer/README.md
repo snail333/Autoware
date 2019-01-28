@@ -25,7 +25,7 @@ The following params can be set in the launch file or by calling rosrun directio
 
 |Parameter|Type|Default|Description|
 |----------|----|-------|-----------|
-|`input_image_topic`|*String*|"/image_cloud"|Depth image topic name (output of cloud projector)|
+|`input_image_topic`|*String*|"/depth_image_vis"|Depth image topic name (output of cloud projector)|
 |`fill_type`|*String*|"multiscale"|"fast" or "multiscale", fast or more accurate|
 |`extrapolate`|*Bool*|false|extrapolate depth to edges of the image|
 |`blur_type`|*String*|"bilateral"|"gaussian" or bilateral|
