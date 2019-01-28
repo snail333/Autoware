@@ -35,6 +35,8 @@
  */
 
 #include "cloud_projector/cloud_projector.h"
+#include "autoware_msgs/DepthImage.h"
+
 
 pcl::PointXYZ
 RosCloudProjectorApp::TransformPoint(const pcl::PointXYZ &in_point, const geometry_msgs::TransformStamped &in_transform)
@@ -87,16 +89,24 @@ void RosCloudProjectorApp::CloudCallback(const sensor_msgs::PointCloud2::ConstPt
   }
 
   //normalize
-  cv::normalize(cloud_projected_image, normalized_output, 255, 0, cv::NORM_MINMAX, CV_16UC1);
+  cv::normalize(cloud_projected_image, normalized_output, 65535, 0, cv::NORM_MINMAX, CV_16UC1);
 
   // Publish
-  cv_bridge::CvImage out_msg;
-  out_msg.header = in_cloud_msg->header;
-  out_msg.header.frame_id   = image_frame_id_;
-  out_msg.encoding = sensor_msgs::image_encodings::MONO16;
-  out_msg.image    = normalized_output; // Your cv::Mat
+  cv_bridge::CvImage image_msg;
+  image_msg.header = in_cloud_msg->header;
+  image_msg.header.frame_id   = image_frame_id_;
+  image_msg.encoding = sensor_msgs::image_encodings::MONO16;
+  image_msg.image    = normalized_output; // Normalize (65535, 0)
 
-  publisher_projected_cloud_.publish(out_msg.toImageMsg());
+  autoware_msgs::DepthImage depth_image;
+  depth_image.header = in_cloud_msg->header;
+  depth_image.header.frame_id = image_frame_id_;
+  depth_image.min_depth = 0;
+  depth_image.max_depth = 100;
+  depth_image.depth_image = *image_msg.toImageMsg();
+
+  publisher_projected_cloud_vis_.publish(image_msg.toImageMsg());
+  publisher_projected_cloud_.publish(depth_image);
 }
 
 void RosCloudProjectorApp::IntrinsicsCallback(const sensor_msgs::CameraInfo &in_message)
@@ -153,7 +163,9 @@ RosCloudProjectorApp::FindTransform(const std::string &in_target_frame, const st
 void RosCloudProjectorApp::InitializeRosIo(ros::NodeHandle &in_private_handle)
 {
   //get params
-  std::string points_src, image_src, camera_info_src, projected_topic_str = "/image_cloud";
+  std::string points_src, image_src, camera_info_src;
+  std::string projected_topic_vis_str = "/depth_image_vis";
+  std::string projected_topic_str = "/depth_image";
   std::string name_space_str = ros::this_node::getNamespace();
 
   ROS_INFO("[%s] This node requires: Registered TF(Lidar-Camera), CameraInfo, Image, and PointCloud.", __APP_NAME__);
@@ -171,6 +183,7 @@ void RosCloudProjectorApp::InitializeRosIo(ros::NodeHandle &in_private_handle)
     }
     image_src = name_space_str + image_src;
     projected_topic_str = name_space_str + projected_topic_str;
+    projected_topic_vis_str = name_space_str + projected_topic_str + "_vis";
     camera_info_src = name_space_str + camera_info_src;
   }
 
@@ -185,8 +198,11 @@ void RosCloudProjectorApp::InitializeRosIo(ros::NodeHandle &in_private_handle)
                                                   1,
                                                   &RosCloudProjectorApp::CloudCallback, this);
 
-  publisher_projected_cloud_ = node_handle_.advertise<sensor_msgs::Image>(projected_topic_str, 1);
-  ROS_INFO("[%s] Publishing projected pointcloud in %s", __APP_NAME__, projected_topic_str.c_str());
+  publisher_projected_cloud_ = node_handle_.advertise<autoware_msgs::DepthImage>(projected_topic_str, 1);
+  ROS_INFO("[%s] Publishing projected pointcloud (depth image) in %s", __APP_NAME__, projected_topic_str.c_str());
+
+  publisher_projected_cloud_vis_ = node_handle_.advertise<sensor_msgs::Image>(projected_topic_vis_str, 1);
+  ROS_INFO("[%s] Publishing visualization topic for depth image in %s", __APP_NAME__, projected_topic_vis_str.c_str());
 
 }
 

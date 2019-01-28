@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
         tf2_geometry_msgs
         tf2_sensor_msgs
         geometry_msgs
+        autoware_msgs
         )
 
 find_package(Qt5Core REQUIRED)
@@ -44,6 +45,7 @@ catkin_package(CATKIN_DEPENDS
         tf2_geometry_msgs
         tf2_sensor_msgs
         geometry_msgs
+        autoware_msgs
         )
 
 # Library

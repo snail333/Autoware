@@ -78,6 +78,7 @@ class RosCloudProjectorApp
 {
   ros::NodeHandle                     node_handle_;
   ros::Publisher                      publisher_projected_cloud_;
+  ros::Publisher                      publisher_projected_cloud_vis_;
   ros::Subscriber                     intrinsics_subscriber_;
 
   tf2_ros::TransformListener          transform_listener_;
